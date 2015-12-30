@@ -1,0 +1,13 @@
+IBSchema.xsd
+vydaje.mmb
+mmupdater/__pycache__/
+settings.ini
+*pyc
+.Python
+[Bb]in
+[Ii]nclude
+[Ll]ib
+[Ll]ocal
+[Ss]cripts
+pyvenv.cfg
+pip-selfcheck.json
