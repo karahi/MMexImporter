@@ -1,7 +1,5 @@
 IBSchema.xsd
 vydaje.mmb
-mmupdater/__pycache__/
-settings.ini
 *pyc
 .Python
 [Bb]in
@@ -11,4 +9,4 @@ settings.ini
 [Ss]cripts
 pyvenv.cfg
 pip-selfcheck.json
-*cfg
+mmeximporter.cfg
