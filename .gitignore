@@ -11,3 +11,4 @@ settings.ini
 [Ss]cripts
 pyvenv.cfg
 pip-selfcheck.json
+*cfg
