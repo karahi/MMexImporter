@@ -1,0 +1,13 @@
+{"dbfile" : "<absolute path to MMEX DB File>",
+  "schemas" : {
+    "<account number>" : {
+                          "date" : 0,
+                          "date_format" : "%Y-%m-%d %H:%M:%S",
+                          "transaction_number" : 3,
+                          "payee" : 5,
+                          "amount" : 8,
+                          "inverse_amount" : "False",
+                          "header" : "True"
+                          }
+  }
+}
