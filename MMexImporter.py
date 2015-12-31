@@ -28,11 +28,11 @@ if not confirm:
 
 
 db = MMexDB.MMexDb(settings)
-# transactions = db.get_transactions(account_number)
-# print transactions
 
 reader = csv.reader(open(file_to_import, "r"))
 schema = settings.getSchema(account_number)
+
+categories = settings.getCategories()
 
 if 'header' in schema and schema['header'] == "True":
   reader.next()
@@ -103,9 +103,16 @@ for row in reader:
 
   CATEGID = -1
   SUBCATEGID = -1
+
+  # Check if matches any configured categories, and populate schema if so
+  cat_id, sub_cat_id = util.get_categoryid_for_payee(PAYEE, categories, db)
+  CATEGID = cat_id
+  SUBCATEGID = sub_cat_id  
+
   TRANSDATE = format_date(datetime.datetime.strptime(row[schema['date']], DATE_FORMAT))
   FOLLOWUPID = -1
   TOTRANSAMOUNT = TRANSAMOUNT
+
  
   t = db.search_transaction(ACCOUNTID=ACCOUNTID, PAYEEID=PAYEEID, TRANSAMOUNT=TRANSAMOUNT, TRANSDATE=TRANSDATE)
   confirm = True

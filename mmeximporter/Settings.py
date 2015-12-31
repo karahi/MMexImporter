@@ -32,22 +32,9 @@ class Settings:
         return self.config['schemas'][account_number]
       except:
         raise UserError("Account %s is missing from 'schemas' in mmeximporter.cfg" % (account_number))
-#     
-#     @property
-#     def categories(self):
-#         result = []
-#         cat_sections = (sec for sec in self.config.sections() if sec.startswith('category-'))
-#         for sec in cat_sections:
-#             categories = sec[9:].split(':', 2)
-#             categories.append(None)
-#             status = self.config[sec]['status']
-#             conditions = []
-#             counter = 1
-#             while 'field'+str(counter) in self.config[sec]:
-#                 conditions.append((self.config[sec]['field'+str(counter)],
-#                                    self.config[sec]['operator'+str(counter)],
-#                                    self.config[sec]['value'+str(counter)]))
-#                 counter = counter + 1
-#             result.append({'category':categories[0], 'subcategory':categories[1],
-#                            'status':status, 'conditions':conditions})
-#         return result
+
+    def getCategories(self):
+      try:
+        return self.config['categories']
+      except:
+        raise UserError("Categories missing from config files, or malformed.")
