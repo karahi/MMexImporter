@@ -2,7 +2,7 @@
 @author: ssuppe
 '''
 
-from mmeximporter import MMexDB, Settings
+from mmeximporter import MMexDB, Settings, UserError
 import util
 import sys, os
 import csv
@@ -34,13 +34,8 @@ db = MMexDB.MMexDb(settings)
 reader = csv.reader(open(file_to_import, "r"))
 schema = settings.getSchema(account_number)
 
-if schema['header']:
+if 'header' in schema and schema['header'] == "True":
   reader.next()
-  
-if schema['inverse_amount']:
-  m = -1
-else:
-  m = 1
   
 DATE = schema["date"]
 DATE_FORMAT = schema['date_format']
@@ -51,18 +46,53 @@ for row in reader:
   TOACCOUNTID = -1
   
   # Check if Payee exists in the DB, otherwise create
-  PAYEE = row[schema['payee']]
-  PAYEEID = db.register_payeeid(PAYEE)
-  print "PAYEE ID: ", PAYEEID
-  # Transactions are stored as absolute values and defined as withdrawals/deposits.
-  TRANSAMOUNT = float(row[schema["amount"]])*m
-  if TRANSAMOUNT < 0:
-    TRANSCODE = "Withdrawal"
+  if 'payee' in schema:
+    try:
+      PAYEE = row[schema['payee']]
+    except IndexError as e:
+      print "Row:", row
+      raise
+    PAYEEID = db.register_payeeid(PAYEE)
+    print "PAYEE ID: ", PAYEEID
   else:
-    TRANSCODE = "Deposit"
-  TRANSAMOUNT = abs(TRANSAMOUNT)
+    raise UserError.UserError("Payee is missing from configuration")
+    
+  if "amount" in schema:
+    # Transactions are stored as absolute values and defined as withdrawals/deposits. 
+    # We then allow the user to 'flip the sign' (since MMeX requires withdrawals to be negative
+    
+    if 'inverse_amount' in schema and schema['inverse_amount'] == "True":
+      m = -1
+    else:
+      m = 1
+    TRANSAMOUNT = float(row[schema["amount"]])*m  
+    # MMex-schema-specific
+    if TRANSAMOUNT < 0:
+      TRANSCODE = "Withdrawal"
+    else:
+      TRANSCODE = "Deposit"
+  else:
+    # There is a column for debits and a column for credits. In this case, we expect both
+    # columns to exist and will enforce our own 'signs'
+    # First check for debits and then for credits
+    TRANSAMOUNT = None
+    if "debit_amount" in schema and row[schema["debit_amount"]] != "":
+      TRANSAMOUNT = float(row[schema["debit_amount"]])
+      TRANSCODE = "Withdrawal"
+    elif "credit_amount" in schema and row[schema["credit_amount"]] != "":
+      TRANSAMOUNT = float(row[schema["credit_amount"]])
+      TRANSCODE = "Deposit"
+    if TRANSAMOUNT == "" or TRANSAMOUNT == None :
+      raise UserError.UserError("Something is wrong with the way you've defined your amount columns.")
+  
+  # Transactions are actually stored as absolute values
+  TRANSAMOUNT = abs(TRANSAMOUNT)    
+    
+  # Mark as not yet reconciled  
   STATUS = ""
-  if 'transaction_number' in schema:
+  
+  # Transaction number is an optional field
+  if 'transaction_number' in schema and schema['transaction_number'] != "False":
     TRANSACTIONNUMBER = row[schema['transaction_number']]
   else:
     TRANSACTIONNUMBER = None
@@ -80,6 +110,7 @@ for row in reader:
  
   t = db.search_transaction(ACCOUNTID=ACCOUNTID, PAYEEID=PAYEEID, TRANSAMOUNT=TRANSAMOUNT, TRANSDATE=TRANSDATE)
   confirm = True
+#   print "TRANSID=%s, ACCOUNTID=%s, TOACCOUNTID=%s, PAYEEID=%s, TRANSAMOUNT=%s, TRANSCODE=%s, STATUS=%s, TRANSACTIONNUMBER=%s, NOTES=%s, CATEGID=%s, SUBCATEGID=%s, TRANSDATE=%s, FOLLOWUPID=%s, TOTRANSAMOUNT=%s" % (TRANSID, ACCOUNTID, TOACCOUNTID, PAYEEID, TRANSAMOUNT,  TRANSCODE, STATUS, TRANSACTIONNUMBER, NOTES, CATEGID, SUBCATEGID, TRANSDATE, FOLLOWUPID, TOTRANSAMOUNT)
   if t:
     print "%s - %s : %s (%s)" % (TRANSDATE, PAYEE, TRANSAMOUNT, TRANSCODE)
     confirm = util.query_yes_no("A possible Transaction already exists. Do you want to continue?", default="no")

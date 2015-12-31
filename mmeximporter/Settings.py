@@ -2,7 +2,7 @@
 @author: ssuppe
 '''
 
-import UserError
+from UserError import UserError
 import os
 import json
 
@@ -28,7 +28,10 @@ class Settings:
       return self.__str__()
       
     def getSchema(self, account_number):
-      return self.config['schemas'][account_number]
+      try:
+        return self.config['schemas'][account_number]
+      except:
+        raise UserError("Account %s is missing from 'schemas' in mmeximporter.cfg" % (account_number))
 #     
 #     @property
 #     def categories(self):
