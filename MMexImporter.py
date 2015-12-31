@@ -53,7 +53,6 @@ for row in reader:
       print "Row:", row
       raise
     PAYEEID = db.register_payeeid(PAYEE)
-    print "PAYEE ID: ", PAYEEID
   else:
     raise UserError.UserError("Payee is missing from configuration")
     
