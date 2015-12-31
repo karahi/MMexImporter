@@ -50,15 +50,15 @@ class MMexDb:
         
     def get_payeeid(self, payee_str):
         try:
-          id = Payee.select().where(Payee.PAYEENAME == payee_str).get()
+          id = Payee.select().where(Payee.PAYEENAME == payee_str.strip()).get()
           return id.PAYEEID
-        except peewee.DoesNotExist:
+        except peewee.DoesNotExist as e:
           return None
     
     def register_payeeid(self, payee_str):
         id = self.get_payeeid(payee_str)
         if id == None:
-          payee = Payee.create(PAYEENAME=payee_str, CATEGID=-1, SUBCATEGID=-1)
+          payee = Payee.create(PAYEENAME=payee_str.strip(), CATEGID=-1, SUBCATEGID=-1)
           id = self.get_payeeid(payee_str)
         return id
     
