@@ -4,12 +4,15 @@ Python scripts to import CSVs of bank data into MMex (Money Manager EX)
 This is a work in progress.  I am not actually a programmer, so please feel free to
 contribute, but please don't judge. :)
 
-##Usage:
+There are two executable scripts meant for 'entry.'
+
+## MMexImporter.py
+###Usage:
 
 1. Copy mmeximporter.cfg.sample to mmeximporter.cfg and fill it in
 2. Call from commandline: ./mmeximporter.cfg \<account number\> \<file\_to\_import\>
 
-## Configuration
+### Configuration
 "Schemas" is a little funny - the key is the account number you'd type in the command line above.  The value is a dictionary of the indices in the CSV for each necessary value for a transaction.  Currently the only supported key/values for transactions are:
 
   1. "payee" : \<index in CSV\>
@@ -21,6 +24,14 @@ contribute, but please don't judge. :)
   5. "date_format" : A strpftime-compatible string of the format the date comes in the CSV for proper parsing
   6. "header" : If this is "True", then the parser skips the first row of the CSV.
   7. "notes" : \<index in CSV\> for arbitrary text that may be included
+
+## AutoCategorize.py
+
+###Usage:
+
+1. Copy mmeximporter.cfg.sample to mmeximporter.cfg and fill in section 'categories.'
+  2. Keys are substrings to search for in the Payee section.  Values are the names of categories/subcategories in MMex.  The values must be exact matches, but the subcategory can also be -1 if you don't want one.  (The integer, not the string)
+3. Call from commandline: ./AutoCategorize.cfg \<account number\> \<file\_to\_import\>
 
 ## Acknowledgements
 This borrows heavily in spirit (but not in code) from kvidoo's [MMexUpdater](https://github.com/kvidoo/MMexUpdater)
